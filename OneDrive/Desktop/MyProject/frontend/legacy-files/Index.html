@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Inventory System</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Dropdown styles */
+    .auth-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .auth-dropdown-btn {
+      background: transparent;
+      color: #c9ada7;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0 1em;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    
+    .auth-dropdown-btn:hover {
+      color: #f2e9e4;
+      background: transparent;
+    }
+    
+    .auth-dropdown-btn.logged-in {
+      color: #4caf50;
+      background: transparent;
+    }
+    
+    .auth-dropdown-btn.logged-in:hover {
+      color: #45a049;
+      background: transparent;
+    }
+    
+    .auth-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 999999;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 5px;
+      /* border: 1px solid #ddd; */
+      /* Ensure proper positioning */
+      transform: translateZ(0);
+    }
+    
+    .auth-dropdown-content.show {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      /* border: 3px solid #ff0000 !important; */
+      background-color: #ffffff !important;
+      /* Force display */
+      position: absolute !important;
+      z-index: 999999 !important;
+    }
+    
+    .auth-dropdown-content a {
+      color: #333;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.3s;
+    }
+    
+    .auth-dropdown-content a:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .auth-dropdown-content a:last-child {
+      border-bottom: none;
+    }
+    
+    .user-info {
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      font-weight: 500;
+    }
+    
+    .user-role {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+    
+    .dropdown-arrow {
+      transition: transform 0.3s;
+      font-size: 10px;
+    }
+    
+    .auth-dropdown.show .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="Index.html">
+      <img src="CISA logo png_1@4x (2).png" alt="Logo" class="site-logo" />
+    </a>
+    <h1>Resource Inventory System</h1>
+    <nav>
+      <a href="Index.html" class="active">Home</a>
+      <a href="Dashboard.html">Dashboard</a>
+      <a href="Report.html">Reports</a>
+      <a href="ViewLog.html">View Log</a>
+      <div class="auth-dropdown" id="authDropdown">
+        <button class="auth-dropdown-btn" id="authDropdownBtn">
+          <span id="authBtnText">Login</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="auth-dropdown-content" id="authDropdownContent">
+          <!-- Content will be populated by JavaScript -->
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div id="appContent" style="display: block;">
+    <!-- Resources Section -->
+    <section id="resourcesSection">
+      <h2>Resources</h2>
+      <div class="resources-controls">
+        <div class="resource-header-controls">
+          <div class="search-filter-group">
+            <input type="text" placeholder="Search resources..." id="resourceSearch" />
+            <select id="typeFilter">
+              <option>All Types</option>
+              <option>Chess Equipment</option>
+              <option>Learning Material</option>
+              <option>Stationery</option>
+              <option>Electronics</option>
+            </select>
+            <select id="statusFilter">
+              <option>All Status</option>
+              <option>Available</option>
+              <option>Checked Out</option>
+              <option>Needs Repair</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <table id="resourcesTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Location</th>
+            <th></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DGT - 2010</td>
+            <td>Chess Equipment</td>
+            <td>17</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+          <tr>
+            <td>DGT - 2500</td>
+            <td>Chess Equipment</td>
+            <td>5</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+          <tr>
+            <td>LEAP - KK9908</td>
+            <td>Chess Equipment</td>
+            <td>4</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+          <tr>
+            <td>HP - Laptop</td>
+            <td>Electronics</td>
+            <td>2</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Chess Strategy Books</td>
+            <td>Learning Material</td>
+            <td>15</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>AirtelInternet - Mifi</td>
+            <td>Electronics</td>
+            <td>15</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>AC</td>
+            <td></td>
+            <td>6</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>Iterative - Screen</td>
+            <td>Electronics</td>
+            <td>2</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>ICT - Computer</td>
+            <td>Electronics</td>
+            <td>12</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>LENOVO - Pads</td>
+            <td>Electronics</td>
+            <td>9</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>Apple - Ipads</td>
+            <td>Electronics</td>
+            <td>1</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+           <tr>
+            <td>Water - Dispenser</td>
+            <td></td>
+            <td>1</td>
+            <td>CISA Innovation Hub</td>
+            <td class="actions-group">
+              <button class="action-btn small">Edit</button>
+              <button class="action-btn small">Delete</button>
+              <button class="check-out-btn">Check Out</button>
+              <button class="check-in-btn">Check In</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Add/Edit Resource Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <form class="form-container">
+        <h2>Add/Edit Resource</h2>
+        <label for="name">Resource Name</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="type">Type/Category</label>
+        <input type="text" id="type" name="type" required />
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description"></textarea>
+
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" name="quantity" min="1" required />
+
+        <label for="unit">Unit</label>
+        <input type="text" id="unit" name="unit" />
+
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" />
+
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option>New</option>
+          <option>Good</option>
+          <option>Fair</option>
+          <option>Needs Repair</option>
+          <option>Retired/Damaged</option>
+        </select>
+
+        <label for="dateAcquired">Date Acquired</label>
+        <input type="date" id="dateAcquired" name="dateAcquired" />
+
+        <label for="assignedTo">Assigned To</label>
+        <input type="text" id="assignedTo" name="assignedTo" />
+
+        <label for="photo">Photo URL</label>
+        <input type="text" id="photo" name="photo" />
+
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes"></textarea>
+
+        <div class="form-actions">
+          <button type="submit">Save</button>
+          <button type="button" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Check In/Out Modal -->
+    <div class="modal-overlay" id="checkModal" style="display:none;">
+      <form class="form-container" id="checkForm">
+        <h2 id="checkModalTitle">Check Out/In Resource</h2>
+        <label for="checkUser">Your Name</label>
+        <input type="text" id="checkUser" name="checkUser" required />
+        <div id="checkPurposeGroup">
+          <label for="checkPurpose">Purpose</label>
+          <input type="text" id="checkPurpose" name="checkPurpose" />
+        </div>
+        <div id="checkConditionGroup" style="display:none;">
+          <label for="checkCondition">Condition/Status</label>
+          <select id="checkCondition" name="checkCondition">
+            <option value="Good">Good</option>
+            <option value="Needs Repair">Needs Repair</option>
+            <option value="Damaged">Damaged</option>
+          </select>
+        </div>
+        <label for="checkLocation">Location (optional)</label>
+        <input type="text" id="checkLocation" name="checkLocation" />
+        <label id="checkQtyLabel" for="checkQty">Quantity to Check Out/In</label>
+        <input type="number" id="checkQty" name="checkQty" min="1" required />
+        <div class="form-actions">
+          <button type="submit">Submit</button>
+          <button type="button" id="cancelCheckBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 Resource Inventory System</p>
+    </footer>
+  </div>
+
+  <!-- Floating Add Resource Button -->
+  <button id="addResourceBtn" class="fab-add-resource action-btn primary">+ Add Resource</button>
+
+  <script src="js/api.js"></script>
+  <script src="Index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Real dropdown logic restored -->
+  <script>
+    // Simple dropdown functionality to test
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdown = document.getElementById('authDropdown');
+      const dropdownBtn = document.getElementById('authDropdownBtn');
+      const dropdownContent = document.getElementById('authDropdownContent');
+      const authBtnText = document.getElementById('authBtnText');
+      
+      if (!dropdown || !dropdownBtn || !dropdownContent || !authBtnText) {
+        console.error('Some dropdown elements are missing!');
+        return;
+      }
+      
+      // Check authentication status
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      const currentUser = localStorage.getItem('currentUser');
+      const isAuthenticated = !!(token && currentUser);
+      
+      // Set initial content
+      if (isAuthenticated) {
+        const user = JSON.parse(currentUser);
+        authBtnText.textContent = user.firstName || user.email || 'User';
+        dropdownBtn.classList.add('logged-in');
+        const loggedInContent = `
+          <div class="user-info">
+            <div>${user.firstName || user.email || 'User'}</div>
+            <div class="user-role">${user.role || 'User'}</div>
+          </div>
+          <a href="#" id="profileLink">Profile</a>
+          <a href="Logout.html" id="logoutPageLink">Logout Page</a>
+          <a href="#" id="logoutLink">Quick Logout</a>
+        `;
+        dropdownContent.innerHTML = loggedInContent;
+      } else {
+        authBtnText.textContent = 'Login';
+        const loggedOutContent = `
+          <a href="Login.html">Login</a>
+          <a href="Register.html">Register</a>
+        `;
+        dropdownContent.innerHTML = loggedOutContent;
+      }
+      
+      // Add click event
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdownContent.classList.toggle('show');
+        if (dropdownContent.classList.contains('show')) {
+          dropdownContent.style.display = 'block';
+        } else {
+          dropdownContent.style.display = 'none';
+        }
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target)) {
+          dropdownContent.classList.remove('show');
+          dropdownContent.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

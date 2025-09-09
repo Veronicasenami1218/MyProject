@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dropdown Debug Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f6f8;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    
+    /* Dropdown styles - EXACTLY the same as Index.html */
+    .auth-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .auth-dropdown-btn {
+      background: transparent;
+      color: #c9ada7;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0 1em;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    
+    .auth-dropdown-btn:hover {
+      color: #f2e9e4;
+      background: transparent;
+    }
+    
+    .auth-dropdown-btn.logged-in {
+      color: #4caf50;
+      background: transparent;
+    }
+    
+    .auth-dropdown-btn.logged-in:hover {
+      color: #45a049;
+      background: transparent;
+    }
+    
+    .auth-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 99999;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      /* Ensure proper positioning */
+      transform: translateZ(0);
+    }
+    
+    .auth-dropdown-content.show {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      border: 3px solid #ff0000 !important;
+      background-color: #ffffff !important;
+      /* Force display */
+      position: absolute !important;
+      z-index: 99999 !important;
+    }
+    
+    .auth-dropdown-content a {
+      color: #333;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.3s;
+    }
+    
+    .auth-dropdown-content a:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .auth-dropdown-content a:last-child {
+      border-bottom: none;
+    }
+    
+    .user-info {
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      font-weight: 500;
+    }
+    
+    .user-role {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+    
+    .dropdown-arrow {
+      transition: transform 0.3s;
+      font-size: 10px;
+    }
+    
+    .auth-dropdown.show .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    
+    .debug-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      border-left: 4px solid #007bff;
+    }
+    
+    .debug-info h3 {
+      margin-top: 0;
+      color: #007bff;
+    }
+    
+    .debug-info pre {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>Dropdown Debug Test</h1>
+    <p>This page tests the dropdown functionality in isolation.</p>
+    
+    <div class="auth-dropdown" id="authDropdown">
+      <button class="auth-dropdown-btn" id="authDropdownBtn">
+        <span id="authBtnText">Login</span>
+        <span class="dropdown-arrow">▼</span>
+      </button>
+      <div class="auth-dropdown-content" id="authDropdownContent">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+    
+    <div class="debug-info">
+      <h3>Debug Information</h3>
+      <div id="debugOutput">
+        <p>Click the dropdown button to see debug info...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Dropdown debug page loaded');
+      
+      const dropdown = document.getElementById('authDropdown');
+      const dropdownBtn = document.getElementById('authDropdownBtn');
+      const dropdownContent = document.getElementById('authDropdownContent');
+      const authBtnText = document.getElementById('authBtnText');
+      const debugOutput = document.getElementById('debugOutput');
+      
+      console.log('Elements found:', {
+        dropdown: !!dropdown,
+        dropdownBtn: !!dropdownBtn,
+        dropdownContent: !!dropdownContent,
+        authBtnText: !!authBtnText
+      });
+      
+      if (!dropdown || !dropdownBtn || !dropdownContent || !authBtnText) {
+        console.error('Some dropdown elements are missing!');
+        return;
+      }
+      
+      // Check authentication status
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      const currentUser = localStorage.getItem('currentUser');
+      const isAuthenticated = !!(token && currentUser);
+      
+      console.log('Auth status:', { token: !!token, currentUser: !!currentUser, isAuthenticated });
+      
+      // Set initial content
+      if (isAuthenticated) {
+        const user = JSON.parse(currentUser);
+        authBtnText.textContent = user.firstName || user.email || 'User';
+        dropdownBtn.classList.add('logged-in');
+        const loggedInContent = `
+          <div class="user-info">
+            <div>${user.firstName || user.email || 'User'}</div>
+            <div class="user-role">${user.role || 'User'}</div>
+          </div>
+          <a href="#" id="profileLink">Profile</a>
+          <a href="Logout.html" id="logoutPageLink">Logout Page</a>
+          <a href="#" id="logoutLink">Quick Logout</a>
+        `;
+        dropdownContent.innerHTML = loggedInContent;
+        console.log('Logged in content set:', loggedInContent);
+      } else {
+        authBtnText.textContent = 'Login';
+        const loggedOutContent = `
+          <a href="Login.html">Login</a>
+          <a href="Register.html">Register</a>
+        `;
+        dropdownContent.innerHTML = loggedOutContent;
+        console.log('Logged out content set:', loggedOutContent);
+      }
+      
+      console.log('Initial dropdown content:', dropdownContent.innerHTML);
+      
+      // Add click event
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Dropdown button clicked!');
+        
+        dropdownContent.classList.toggle('show');
+        const isVisible = dropdownContent.classList.contains('show');
+        console.log('Dropdown visible:', isVisible);
+        
+        // Add some visual feedback
+        if (isVisible) {
+          dropdownContent.style.border = '3px solid red';
+          dropdownContent.style.backgroundColor = '#ffffff';
+          dropdownContent.style.display = 'block';
+          dropdownContent.style.visibility = 'visible';
+          dropdownContent.style.opacity = '1';
+          dropdownContent.style.zIndex = '99999';
+          dropdownContent.style.position = 'absolute';
+          
+          // Debug: Check computed styles
+          const computedStyle = window.getComputedStyle(dropdownContent);
+          console.log('Computed styles:', {
+            display: computedStyle.display,
+            visibility: computedStyle.visibility,
+            opacity: computedStyle.opacity,
+            zIndex: computedStyle.zIndex,
+            position: computedStyle.position,
+            top: computedStyle.top,
+            right: computedStyle.right,
+            width: computedStyle.width,
+            height: computedStyle.height,
+            backgroundColor: computedStyle.backgroundColor
+          });
+          
+          // Update debug output
+          debugOutput.innerHTML = `
+            <h4>Dropdown is SHOWN</h4>
+            <pre>Display: ${computedStyle.display}
+Visibility: ${computedStyle.visibility}
+Opacity: ${computedStyle.opacity}
+Z-Index: ${computedStyle.zIndex}
+Position: ${computedStyle.position}
+Top: ${computedStyle.top}
+Right: ${computedStyle.right}
+Border: ${computedStyle.border}
+Background: ${computedStyle.backgroundColor}
+Width: ${computedStyle.width}
+Height: ${computedStyle.height}
+Content: ${dropdownContent.innerHTML}</pre>
+          `;
+        } else {
+          dropdownContent.style.border = 'none';
+          dropdownContent.style.display = 'none';
+          
+          // Update debug output
+          debugOutput.innerHTML = `
+            <h4>Dropdown is HIDDEN</h4>
+            <p>Click the dropdown button to show it again.</p>
+          `;
+        }
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target)) {
+          dropdownContent.classList.remove('show');
+          dropdownContent.style.border = 'none';
+          debugOutput.innerHTML = `
+            <h4>Dropdown closed (clicked outside)</h4>
+            <p>Click the dropdown button to show it again.</p>
+          `;
+        }
+      });
+      
+      console.log('Dropdown debug setup complete!');
+    });
+  </script>
+</body>
+</html> 

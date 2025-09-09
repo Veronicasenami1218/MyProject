@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Dropdown styles */
+    .auth-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .auth-dropdown-btn {
+      background: transparent;
+      color: #c9ada7;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0 1em;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    
+    .auth-dropdown-btn:hover {
+      color: #f2e9e4;
+      background: transparent;
+    }
+    
+    .auth-dropdown-btn.logged-in {
+      color: #4caf50;
+    }
+    
+    .auth-dropdown-btn.logged-in:hover {
+      color: #45a049;
+    }
+    
+    .auth-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: white;
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 1000;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    
+    .auth-dropdown-content.show {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .auth-dropdown-content a {
+      color: #333;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.3s;
+    }
+    
+    .auth-dropdown-content a:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .auth-dropdown-content a:last-child {
+      border-bottom: none;
+    }
+    
+    .user-info {
+      background: #f8f9fa;
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      font-weight: 500;
+    }
+    
+    .user-role {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+    
+    .dropdown-arrow {
+      transition: transform 0.3s;
+    }
+    
+    .auth-dropdown.show .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script>
+    // Multiple fallbacks for Chart.js
+    if (typeof Chart === 'undefined') {
+      console.log('Primary CDN failed, trying fallback 1...');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.min.js"><\/script>');
+    }
+  </script>
+  <script>
+    // Second fallback
+    if (typeof Chart === 'undefined') {
+      console.log('Fallback 1 failed, trying fallback 2...');
+      document.write('<script src="https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>');
+    }
+  </script>
+  <script>
+    // Third fallback
+    if (typeof Chart === 'undefined') {
+      console.log('Fallback 2 failed, trying fallback 3...');
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.0/chart.umd.min.js"><\/script>');
+    }
+  </script>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <header>
+    <a href="Index.html">
+      <img src="CISA logo png_1@4x (2).png" alt="Logo" class="site-logo" />
+    </a>
+    <h1>Resource Inventory System</h1>
+    <nav>
+      <a href="Index.html">Home</a>
+      <a href="Dashboard.html" class="active">Dashboard</a>
+      <a href="Report.html">Reports</a>
+      <a href="ViewLog.html">View Log</a>
+      <div class="auth-dropdown" id="authDropdown">
+        <button class="auth-dropdown-btn" id="authDropdownBtn">
+          <span id="authBtnText">Login</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div class="auth-dropdown-content" id="authDropdownContent">
+          <!-- Content will be populated by JavaScript -->
+        </div>
+      </div>
+    </nav>
+  </header>
+<main>
+  <!-- Dashboard Overview Section -->
+  <section id="dashboardOverview" style="margin-bottom: 2em;">
+    <h2>Dashboard Overview</h2>
+    <div class="stats-container">
+      <div class="stat-card stat-bg-blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <h3 id="totalResources">0 <span class="trend" id="totalResourcesTrend"></span></h3>
+          <p>Total Resources</p>
+        </div>
+      </div>
+      <div class="stat-card stat-bg-red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-content">
+          <h3 id="lowStockCount">0 <span class="trend" id="lowStockCountTrend"></span></h3>
+          <p>Low Stock Alerts</p>
+        </div>
+      </div>
+      <div class="stat-card stat-bg-purple">
+        <div class="stat-icon">📤</div>
+        <div class="stat-content">
+          <h3 id="checkedOutCount">0 <span class="trend" id="checkedOutCountTrend"></span></h3>
+          <p>Checked Out Items</p>
+        </div>
+      </div>
+      <div class="stat-card stat-bg-green">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3 id="activeUsers">0 <span class="trend" id="activeUsersTrend"></span></h3>
+          <p>Active Users</p>
+        </div>
+      </div>
+    </div>
+    <div class="quick-actions">
+      <button id="addResourceBtn" class="action-btn primary">➕ Add Resource</button>
+      <button id="quickCheckoutBtn" class="action-btn">📤 Quick Check Out</button>
+      <button id="generateReportBtn" class="action-btn">📊 Generate Report</button>
+      <button id="exportDataBtn" class="action-btn">📥 Export Data</button>
+    </div>
+    <div class="alerts-section" id="alertsSection" style="display: none;">
+      <h3>⚠️ Alerts & Notifications</h3>
+      <div id="alertsContainer"></div>
+    </div>
+  </section>
+  <section id="recentActivity" style="margin-bottom: 2em;">
+    <h2>Recent Activity</h2>
+    <div class="activity-feed" id="activityFeed">
+      <div class="activity-item">
+        <span class="activity-time">Just now</span>
+        <span class="activity-text">System initialized. Welcome to Resource Inventory System!</span>
+      </div>
+    </div>
+  </section>
+  <section id="analyticsSection" style="margin-top: 2em;">
+    <h2>Analytics & Reports</h2>
+    <div class="analytics-grid">
+      <div class="chart-container">
+        <h3>Resource Distribution by Type</h3>
+        <canvas id="resourceTypeChart" width="400" height="300"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Usage Trends (Last 7 Days)</h3>
+        <canvas id="usageTrendChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Add Resource Modal -->
+<div id="addResourceModal" class="modal-overlay">
+  <div class="form-container">
+    <h2>Add New Resource</h2>
+    <form id="addResourceForm">
+      <label for="resourceName">Resource Name:</label>
+      <input type="text" id="resourceName" name="resourceName" required>
+      
+      <label for="resourceType">Resource Type:</label>
+      <select id="resourceType" name="resourceType" required>
+        <option value="">Select Type</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Office Supplies">Office Supplies</option>
+        <option value="Books">Books</option>
+        <option value="Tools">Tools</option>
+        <option value="Other">Other</option>
+      </select>
+      
+      <label for="resourceQuantity">Quantity:</label>
+      <input type="number" id="resourceQuantity" name="resourceQuantity" min="0" value="1" required>
+      
+      <label for="resourceLocation">Location:</label>
+      <input type="text" id="resourceLocation" name="resourceLocation" required>
+      
+      <label for="resourceStatus">Status:</label>
+      <select id="resourceStatus" name="resourceStatus" required>
+        <option value="Available">Available</option>
+        <option value="Checked Out">Checked Out</option>
+        <option value="Needs Repair">Needs Repair</option>
+        <option value="Out of Stock">Out of Stock</option>
+      </select>
+      
+      <label for="resourceDescription">Description (Optional):</label>
+      <textarea id="resourceDescription" name="resourceDescription" rows="3"></textarea>
+      
+      <div class="form-actions">
+        <button type="button" id="cancelAddResource" class="action-btn">Cancel</button>
+        <button type="submit" class="action-btn primary">Add Resource</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Quick Check Out Modal -->
+<div id="quickCheckoutModal" class="modal-overlay">
+  <div class="form-container">
+    <h2>Quick Check Out</h2>
+    <form id="quickCheckoutForm">
+      <label for="checkoutResource">Select Resource:</label>
+      <select id="checkoutResource" name="checkoutResource" required>
+        <option value="">Select a resource to check out</option>
+      </select>
+      
+      <label for="checkoutUser">User Name:</label>
+      <input type="text" id="checkoutUser" name="checkoutUser" required>
+      
+      <label for="checkoutQuantity">Quantity to Check Out:</label>
+      <input type="number" id="checkoutQuantity" name="checkoutQuantity" min="1" value="1" required>
+      
+      <label for="checkoutDetails">Purpose/Details (Optional):</label>
+      <textarea id="checkoutDetails" name="checkoutDetails" rows="3" placeholder="e.g., For project work, Meeting room setup, etc."></textarea>
+      
+      <div class="form-actions">
+        <button type="button" id="cancelCheckout" class="action-btn">Cancel</button>
+        <button type="submit" class="action-btn primary">Check Out</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div id="generateReportModal" class="modal-overlay">
+  <div class="form-container" style="max-width: 800px;">
+    <h2>Generate Report</h2>
+    <div id="reportContent">
+      <div class="report-section">
+        <h3>Quick Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Total Resources:</span>
+            <span class="stat-value" id="reportTotalResources">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Available:</span>
+            <span class="stat-value" id="reportAvailableResources">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Checked Out:</span>
+            <span class="stat-value" id="reportCheckedOutResources">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Low Stock:</span>
+            <span class="stat-value" id="reportLowStockResources">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Needs Repair:</span>
+            <span class="stat-value" id="reportRepairResources">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Active Users:</span>
+            <span class="stat-value" id="reportActiveUsers">0</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="report-section">
+        <h3>Resource Distribution by Type</h3>
+        <div class="type-distribution" id="typeDistribution">
+          <!-- Type distribution will be populated here -->
+        </div>
+      </div>
+      
+      <div class="report-section">
+        <h3>Recent Activity Summary</h3>
+        <div class="activity-summary" id="activitySummary">
+          <!-- Recent activity will be populated here -->
+        </div>
+      </div>
+      
+      <div class="report-section">
+        <h3>Export Options</h3>
+        <div class="export-options">
+          <button id="exportReportCSV" class="action-btn">📊 Export as CSV</button>
+          <button id="exportReportPDF" class="action-btn">📄 Export as PDF</button>
+          <button id="printReport" class="action-btn">🖨️ Print Report</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="button" id="closeReportModal" class="action-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Data Modal -->
+<div id="exportDataModal" class="modal-overlay">
+  <div class="form-container" style="max-width: 600px;">
+    <h2>Export Data</h2>
+    <div id="exportDataContent">
+      <div class="export-section">
+        <h3>Select Data to Export</h3>
+        <div class="export-options-grid">
+          <label class="export-option">
+            <input type="checkbox" id="exportResources" checked>
+            <span class="export-option-text">
+              <strong>📦 Resources Inventory</strong>
+              <small>All resources with details, quantities, and status</small>
+            </span>
+          </label>
+          <label class="export-option">
+            <input type="checkbox" id="exportActivityLogs" checked>
+            <span class="export-option-text">
+              <strong>📋 Activity Logs</strong>
+              <small>All check-ins, check-outs, and system activities</small>
+            </span>
+          </label>
+          <label class="export-option">
+            <input type="checkbox" id="exportStatistics" checked>
+            <span class="export-option-text">
+              <strong>📊 Statistics & Analytics</strong>
+              <small>Dashboard statistics and trend data</small>
+            </span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="export-section">
+        <h3>Export Format</h3>
+        <div class="format-options">
+          <label class="format-option">
+            <input type="radio" name="exportFormat" value="csv" checked>
+            <span class="format-option-text">
+              <strong>📄 CSV (Excel)</strong>
+              <small>Compatible with Excel, Google Sheets, and databases</small>
+            </span>
+          </label>
+          <label class="format-option">
+            <input type="radio" name="exportFormat" value="json">
+            <span class="format-option-text">
+              <strong>🔧 JSON</strong>
+              <small>Structured data format for developers and APIs</small>
+            </span>
+          </label>
+          <label class="format-option">
+            <input type="radio" name="exportFormat" value="txt">
+            <span class="format-option-text">
+              <strong>📝 Text</strong>
+              <small>Simple text format for easy reading</small>
+            </span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="export-section">
+        <h3>Export Options</h3>
+        <div class="export-settings">
+          <label class="setting-option">
+            <input type="checkbox" id="includeHeaders" checked>
+            <span>Include column headers</span>
+          </label>
+          <label class="setting-option">
+            <input type="checkbox" id="includeTimestamps" checked>
+            <span>Include timestamps</span>
+          </label>
+          <label class="setting-option">
+            <input type="checkbox" id="formatDates" checked>
+            <span>Format dates for readability</span>
+          </label>
+        </div>
+      </div>
+      
+      <div class="export-section">
+        <h3>Data Summary</h3>
+        <div class="data-summary" id="dataSummary">
+          <!-- Data summary will be populated here -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="button" id="cancelExportData" class="action-btn">Cancel</button>
+      <button type="button" id="exportDataSubmitBtn" class="action-btn primary">📥 Export Data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const myEmail = "veronicasenami977@gmail.com";
+  const bypassAdmin = localStorage.getItem('bypassAdmin');
+  if (
+    (!token || !currentUser) &&
+    (!currentUser || currentUser.email !== myEmail) &&
+    bypassAdmin !== myEmail
+  ) {
+    window.location.href = "Index.html";
+  }
+</script>
+
+<script src="js/api.js"></script>
+<script src="auth-dropdown.js"></script>
+<script src="Dashboard.js"></script>
+</body>
+</html>

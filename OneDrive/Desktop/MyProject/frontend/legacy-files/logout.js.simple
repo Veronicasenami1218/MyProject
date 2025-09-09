@@ -1,0 +1,24 @@
+// logout.js
+
+// Call this function to protect a page (redirects to Login.html if not logged in)
+function protectPage() {
+    if (!localStorage.getItem('username') || !localStorage.getItem('role')) {
+        window.location.href = 'Login.html';
+    }
+}
+
+// Call this function to set up a logout button by its ID
+function setupLogoutButton(buttonId = 'logoutBtn') {
+    const btn = document.getElementById(buttonId);
+    if (btn) {
+        btn.addEventListener('click', function() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('role');
+            window.location.href = 'Login.html';
+        });
+    }
+}
+
+// Example usage (uncomment as needed):
+// protectPage();
+// setupLogoutButton(); 
